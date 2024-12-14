@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  streamlit:
+    build:
+      context: ./FrontEnd
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./shared_folder_local:/app/uploads
+    networks:
+      - conecta
+
+  fastapi:
+    build:
+      context: ./BackEnd
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./shared_folder_wiki:/app/Wiki_Files
+      - ./shared_folder_local:/app/Local_Files
+    networks:
+      - conecta
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: wiki
+      POSTGRES_PASSWORD: wikijsrocks
+      POSTGRES_USER: wikijs
+    logging:
+      driver: "none"
+    restart: unless-stopped
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      
+  wiki:
+    image: ghcr.io/requarks/wiki:2
+    depends_on:
+      - db
+    ports:
+      - "80:3000"
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: wikijs
+      DB_PASS: wikijsrocks
+      DB_NAME: wiki
+    volumes:
+      - ./shared_folder_wiki:/wiki/shared_folder_wiki
+
+volumes:
+  shared_folder_wiki:
+  shared_folder_local:
+  db-data:
+
+networks:
+  conecta:

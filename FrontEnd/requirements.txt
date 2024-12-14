@@ -1,0 +1,8 @@
+Requests
+streamlit
+streamlit_antd_components
+python-dotenv
+llama_index
+openai
+pdfkit
+markdown2
